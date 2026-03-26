@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>后宫·选秀司｜甄嬛传·审查风云</title>
+    <style>
+        * { box-sizing: border-box; user-select: none; }
+        body {
+            background: linear-gradient(145deg, #3e2a2a 0%, #2a1a1a 100%);
+            font-family: 'Courier New', '华文楷书', 'Fira Code', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        .intro-card {
+            background: #4e3622;
+            border: 2px solid #e6b450;
+            border-radius: 32px;
+            max-width: 550px;
+            width: 90%;
+            padding: 30px 24px;
+            text-align: center;
+            color: #fff0cf;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .intro-card h1 {
+            margin-top: 0;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            border-bottom: 2px solid #e6b450;
+            display: inline-block;
+            padding-bottom: 8px;
+        }
+        .intro-card p { font-size: 1rem; line-height: 1.5; margin: 20px 0; text-align: left; }
+        .intro-card ul { text-align: left; margin: 15px 0; padding-left: 20px; }
+        .intro-card li { margin: 8px 0; }
+        .start-btn {
+            background: #9b6a3c;
+            color: #fff0cf;
+            border: none;
+            font-size: 1.3rem;
+            padding: 12px 32px;
+            border-radius: 60px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: 0.1s linear;
+            box-shadow: 0 4px 0 #5e3a1f;
+        }
+        .start-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #5e3a1f; }
+        .game-container {
+            max-width: 1100px;
+            width: 100%;
+            background: #5a3e2a;
+            border-radius: 28px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.5);
+            border: 1px solid #e6b450;
+            overflow: hidden;
+        }
+        .header {
+            background: #2f241b;
+            padding: 12px 20px;
+            border-bottom: 3px solid #e6b450;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .officer-info { background: #1f1812; padding: 5px 12px; border-radius: 40px; color: #ffefc0; }
+        .officer-name { color: #ffdd99; }
+        .stats { display: flex; gap: 20px; background: #1f1812; padding: 5px 15px; border-radius: 30px; flex-wrap: wrap; }
+        .stat span:first-child { color: #e6c394; }
+        .stat span:last-child { color: #ffdd99; margin-left: 6px; font-weight: bold; }
+        .day-info {
+            background: #2f241b;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-weight: bold;
+            color: #ffdd99;
+            border: 1px solid #e6b450;
+        }
+        .rule-panel {
+            background: #3e2c1f;
+            padding: 10px 20px;
+            font-size: 0.7rem;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #b8874a;
+        }
+        .rule-list { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+        .rule-list li {
+            background: #2a1e14;
+            padding: 2px 12px;
+            border-radius: 20px;
+            border-left: 3px solid #ffcf7a;
+            color: #ffefcf;
+            font-weight: 500;
+        }
+        .date-badge {
+            background: #00000066;
+            padding: 2px 12px;
+            border-radius: 20px;
+            color: #ffdd99;
+            font-weight: bold;
+        }
+        .daily-effect {
+            background: #6f4f2e;
+            margin: 8px 20px;
+            padding: 6px 15px;
+            border-radius: 30px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #fff0cf;
+            border-left: 4px solid #ffcf7a;
+        }
+        .event-area {
+            background: #4d3520;
+            margin: 12px 20px;
+            padding: 12px 18px;
+            border-radius: 28px;
+            text-align: center;
+            color: #ffefcf;
+            border: 2px solid #e6b450;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .event-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .event-btn {
+            background: #7c5a38;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            color: #ffefcf;
+            transition: 0.1s;
+        }
+        .event-btn:active { transform: scale(0.96); }
+        .inspection-area { padding: 20px; background: #4f3824; }
+        .applicant-title {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #ffefcf;
+            border-bottom: 1px dashed #c6944a;
+            display: inline-block;
+            width: auto;
+            margin: 0 auto 20px;
+            padding-bottom: 5px;
+        }
+        .card-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        .card {
+            flex: 1;
+            min-width: 280px;
+            background: #fff2e0;
+            border-radius: 20px;
+            padding: 16px;
+            box-shadow: 6px 6px 0 #2e2218;
+        }
+        .card h3 { margin: 0 0 12px; font-size: 1rem; text-align: center; border-bottom: 2px solid #c6944a; color: #5a3c22; }
+        .info-row { margin: 8px 0; display: flex; font-size: 0.85rem; border-bottom: 1px dotted #d6b27a; padding: 4px 0; }
+        .info-label { font-weight: bold; width: 85px; color: #9b6a3c; }
+        .info-value { font-weight: 600; color: #2f241b; flex: 1; word-break: break-word; }
+        .warning-note { background: #fbe9c3; font-size: 0.7rem; text-align: center; margin-top: 12px; padding: 5px; border-radius: 30px; color: #7a4a1a; }
+        .action-area { display: flex; justify-content: center; gap: 20px; margin: 20px; }
+        button {
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #3f2e1f;
+            background: #7c5a38;
+            color: #ffefcf;
+        }
+        button:active { transform: translateY(2px); }
+        .approve-btn { background: #4f7a3e; box-shadow: 0 3px 0 #2f5320; }
+        .reject-btn { background: #ac5a3e; box-shadow: 0 3px 0 #74381f; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .feedback {
+            background: #2f241b;
+            margin: 5px 20px 20px;
+            padding: 12px;
+            text-align: center;
+            border-radius: 40px;
+            font-weight: bold;
+            border-left: 5px solid #ffcf7a;
+            color: #ffefcf;
+        }
+        .bottom-bar {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 0 20px 20px;
+        }
+        .reset-btn, .shop-btn {
+            background: #8b6942;
+            font-size: 1rem;
+            padding: 8px 20px;
+            box-shadow: 0 3px 0 #5a3e22;
+            flex: 1;
+        }
+        .shop-btn { background: #5c7a3e; }
+        .item-area {
+            background: #4f3824;
+            margin: 0 20px 15px;
+            padding: 8px 15px;
+            border-radius: 40px;
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #ffefcf;
+        }
+        .item { background: #2f241b; padding: 4px 12px; border-radius: 30px; display: inline-block; }
+        footer { font-size: 0.65rem; text-align: center; color: #cfb27a; padding: 10px; }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #5a3e2a;
+            max-width: 400px;
+            width: 90%;
+            border-radius: 28px;
+            padding: 20px;
+            border: 2px solid #e6b450;
+            color: #ffefcf;
+        }
+        .modal-content h3 { margin-top: 0; text-align: center; }
+        .shop-item { margin: 12px 0; display: flex; justify-content: space-between; align-items: center; }
+        .shop-item button { font-size: 0.8rem; padding: 4px 12px; background: #6a9a4a; }
+        .close-modal { background: #ac5a3e; margin-top: 15px; width: 100%; }
+        .end-report {
+            background: #2f241b;
+            margin: 5px 20px 20px;
+            padding: 15px;
+            border-radius: 28px;
+            text-align: center;
+            border: 2px solid #ffcf7a;
+            color: #ffefcf;
+            line-height: 1.5;
+        }
+        .end-report h3 { margin: 0 0 10px; color: #ffdd99; }
+        .achievement-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 10px; }
+        .decree-warning {
+            background: #ac5a3e;
+            color: #ffdd99;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
+    </style>
+</head>
+<body>
+    <div id="introOverlay" class="intro-overlay">
+        <div class="intro-card">
+            <h1>🌸 后宫·选秀司</h1>
+            <p>奉天承运，皇帝诏曰：命你执掌选秀审查，凡秀女入宫，须经六部核查，不得有误！</p>
+            <p>📜 六项铁律（须全部一致方可入选）：</p>
+            <ul>
+                <li>✅ 秀女姓名（与名帖一致）</li>
+                <li>✅ 名帖编号（与内务府档一致）</li>
+                <li>✅ 画像特征（与本人描述一致）</li>
+                <li>✅ 指印纹路（与存档相同）</li>
+                <li>✅ 名帖有效期 ≥ 康熙五十四年（1715年）</li>
+                <li>✅ 签发地 = 紫禁城·内务府</li>
+            </ul>
+            <p>⚡ 后宫风云诡谲，华妃、皇后、甄嬛……各方势力将轮番登场，你的每个决断都将影响圣眷与私库银两，甚至改写结局！</p>
+            <p>完成30件选秀案（6日任期），根据圣眷与银两，触发“钮祜禄·甄嬛”级晋升或冷宫悲歌。</p>
+            <button class="start-btn" id="startGameBtn">🗳️ 接旨上任</button>
+        </div>
+    </div>
+
+    <div class="game-container" id="gameContainer" style="display: none;">
+        <div class="header">
+            <div class="officer-info">📜 选秀司主理 · <span id="officerName" class="officer-name">--</span></div>
+            <div class="stats">
+                <div class="stat"><span>⭐ 圣眷</span> <span id="scoreValue">0</span></div>
+                <div class="stat"><span>💰 私库银两</span> <span id="moneyValue">0</span></div>
+                <div class="stat"><span>📌 审阅</span> <span id="caseCounter">0</span><span id="totalCasesSpan">/0</span></div>
+                <div class="day-info" id="dayInfo">第 1 / 6 日</div>
+            </div>
+        </div>
+        <div class="rule-panel">
+            <ul class="rule-list">
+                <li>✅ 姓名一致</li><li>✅ 名帖编号一致</li><li>✅ 画像特征一致</li>
+                <li>✅ 指印纹路一致</li><li>✅ 有效期 ≥ 1715-01-01</li><li>✅ 签发地 = 紫禁城·内务府</li>
+            </ul>
+            <div class="date-badge">📅 康熙五十四年 正月</div>
+        </div>
+        <div id="dailyEffectArea" class="daily-effect" style="display: none;"></div>
+        <div id="decreeWarning" class="decree-warning" style="display: none; text-align: center; margin: 8px 20px;"></div>
+        <div id="dynamicEventArea" class="event-area" style="display: none;"></div>
+
+        <div class="inspection-area">
+            <div style="text-align:center;"><span class="applicant-title">🌸 秀女 · 陈情与名帖</span></div>
+            <div class="card-grid">
+                <div class="card">
+                    <h3>🎤 秀女口述</h3>
+                    <div class="info-row"><span class="info-label">闺名</span><span class="info-value" id="declName">—</span></div>
+                    <div class="info-row"><span class="info-label">名帖编号</span><span class="info-value" id="declID">—</span></div>
+                    <div class="info-row"><span class="info-label">画像特征</span><span class="info-value" id="declPhoto">—</span></div>
+                    <div class="info-row"><span class="info-label">指印纹路</span><span class="info-value" id="declFinger">—</span></div>
+                    <div class="warning-note">⚠️ 秀女自述信息，需与名帖对证</div>
+                </div>
+                <div class="card">
+                    <h3>🪪 内务府名帖</h3>
+                    <div class="info-row"><span class="info-label">闺名</span><span class="info-value" id="docName">—</span></div>
+                    <div class="info-row"><span class="info-label">名帖编号</span><span class="info-value" id="docID">—</span></div>
+                    <div class="info-row"><span class="info-label">画像特征</span><span class="info-value" id="docPhoto">—</span></div>
+                    <div class="info-row"><span class="info-label">指印纹路</span><span class="info-value" id="docFinger">—</span></div>
+                    <div class="info-row"><span class="info-label">有效期至</span><span class="info-value" id="docExpiry">—</span></div>
+                    <div class="info-row"><span class="info-label">签发宝玺</span><span class="info-value" id="docIssue">—</span></div>
+                    <div class="warning-note">🔍 名帖、宝玺、六项缺一不可</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-area">
+            <button class="approve-btn" id="approveBtn">✅ 赐花入选</button>
+            <button class="reject-btn" id="rejectBtn">⛔ 撂牌子赐花</button>
+        </div>
+
+        <div class="item-area" id="itemArea">
+            <span class="item">🛡️ 护身符: <span id="amuletCount">0</span></span>
+            <span class="item">🔍 洞察之眼: <span id="lensCount">0</span>次</span>
+            <span class="item">💰 密折特权: <span id="bribeExemptCount">0</span></span>
+        </div>
+
+        <div class="feedback" id="feedbackMsg">选秀司静候，请审阅秀女名帖。</div>
+        <div class="bottom-bar">
+            <button class="reset-btn" id="resetBtn">🔄 重启选秀任期</button>
+            <button class="shop-btn" id="shopBtn">🛒 内务府黑市</button>
+        </div>
+        <footer>6日·30秀女·后宫风云·每个选择都可能改变命运</footer>
+    </div>
+
+    <div id="shopModal" class="modal">
+        <div class="modal-content">
+            <h3>🛒 内务府黑市</h3>
+            <div class="shop-item">🛡️ 护身符 <span>抵消一次圣眷折损</span> <button id="buyAmulet">购买 (30两)</button></div>
+            <div class="shop-item">🔍 洞察之眼 <span>每次审阅揭示一条疑点(3次)</span> <button id="buyLens">购买 (20两)</button></div>
+            <div class="shop-item">💰 密折特权 <span>免除一次受贿负面影响</span> <button id="buyExempt">购买 (40两)</button></div>
+            <button class="close-modal" id="closeModal">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ========== 后宫·选秀司 完整逻辑 ==========
+            const DAY_CASES = 5;
+            const TOTAL_DAYS = 6;
+            const TOTAL_CASES = DAY_CASES * TOTAL_DAYS;
+            const CURRENT_DATE = "1715-01-01";
+            const LEGAL_CITY = "紫禁城·内务府";
+            const LEGAL_PROBABILITY = 0.28;
+            const MAX_ERRORS = 4;
+            const EVENT_TRIGGER_RATE = 0.65;
+            
+            const DAILY_EFFECTS = [
+                { name: "👑 皇上垂怜", effect: (delta) => Math.round(delta * 1.2), desc: "圣眷变化±20%" },
+                { name: "📜 太后查案", desc: "今日所有名帖额外增加一项随机检查", extraCheck: true },
+                { name: "💰 年羹尧献银", desc: "行贿之风盛行，贿赂事件频率大增", bribeBoost: true },
+                { name: "🕊️ 甄嬛善举", effect: (delta, isCorrect) => isCorrect ? delta + 1 : delta, desc: "每次正确判定额外+1圣眷" },
+                { name: "⚡ 华妃震怒", effect: (delta, isCorrect) => isCorrect ? delta : delta - 1, desc: "错误扣分额外-1圣眷" },
+                { name: "🎁 苏培盛孝敬", startMoney: 25, desc: "每日开始获得25两" }
+            ];
+            
+            const ADVANCED_EVENTS = [
+                { title: "😭 安陵容的哀求", type: "anlingrong", desc: "安答应跪在选秀司外，哭诉自己名帖被皇后身边人篡改，望你通融。", options: [
+                    { text: "法外开恩，放行", score: 1, money: 0, msg: "你心软放行，安陵容日后暗中相助，圣眷+1。", kindness: true, followupType: "an_kind" },
+                    { text: "秉公办事，拒绝", score: 0, money: 15, msg: "安陵容塞给你一包银两，求你别声张。银两+15。", kindness: false, followupType: "an_strict" },
+                    { text: "上报皇后处理", score: 0, money: 0, msg: "皇后夸你规矩，无事发生。", kindness: false, followupType: null }
+                ] },
+                { title: "👑 华妃驾到", type: "huafei", desc: "华妃娘娘突然驾临，暗示你刷掉一批与甄嬛交好的秀女，并递上一袋金子。", options: [
+                    { text: "收下金子，照办", score: -2, money: 60, msg: "你收了金子，按华妃意思办事，圣眷-2，银两+60。", followupType: "hua_accept" },
+                    { text: "拒绝并上报皇上", score: 3, money: 0, msg: "你冒死向皇上密报，龙颜大悦，圣眷+3。", followupType: "hua_refuse" },
+                    { text: "虚与委蛇，暗中留证", score: 2, money: 60, msg: "你收钱但未照办，留证后呈给甄嬛，圣眷+2，银两+60。", followupType: "hua_betray" }
+                ] },
+                { title: "🎋 甄嬛的密信", type: "zhenhuan", desc: "莞贵人差人送来一封密信，提醒你皇后近期要在选秀中动手脚，望你小心。", options: [
+                    { text: "感谢提醒，加倍谨慎", score: 2, money: 0, msg: "你提前防范，避免陷阱，圣眷+2。", followupType: "zhen_thank" },
+                    { text: "漠视不理", score: -1, money: 0, msg: "你未加防范，事后被责，圣眷-1。", followupType: "zhen_ignore" },
+                    { text: "将信交给皇后邀功", score: -2, money: 30, msg: "皇后赏你银两，但甄嬛党羽视你为敌，圣眷-2，银两+30。", followupType: "zhen_betray" }
+                ] },
+                { title: "😈 皇后的阴谋", type: "empress", desc: "皇后宜修身边剪秋悄悄告诉你，若你愿在选秀中“配合”，将来可保你升职。", options: [
+                    { text: "拒绝并警告", score: 2, money: 0, msg: "你义正词严，皇后虽恼怒但暂时不敢动你，圣眷+2。", followupType: "empress_refuse" },
+                    { text: "假意答应，暗中收集证据", score: 3, money: 50, msg: "你收下50两，将证据交给甄嬛，圣眷+3，银两+50。", followupType: "empress_betray" },
+                    { text: "唯命是从", score: -2, money: 80, msg: "你沦为皇后棋子，圣眷-2，银两+80。", followupType: "empress_accept" }
+                ] },
+                { title: "💎 年羹尧送礼", type: "niangao", desc: "年大将军派人送来一箱珍宝，希望你在华妃举荐的秀女上通融。", options: [
+                    { text: "收下珍宝", score: -2, money: 100, msg: "圣眷-2，银两+100。", followupType: "nian_accept" },
+                    { text: "拒收并上报", score: 3, money: 0, msg: "皇上赞赏你的廉洁，圣眷+3。", followupType: "nian_refuse" },
+                    { text: "收下后匿名捐给国库", score: 1, money: 100, msg: "既得银两又得美名，圣眷+1，银两+100。", followupType: "nian_donate" }
+                ] },
+                { title: "📰 果郡王暗中调查", type: "guojun", desc: "果郡王微服来访，想了解选秀是否公正，并表示愿为你美言。", options: [
+                    { text: "如实相告", score: 2, money: 0, msg: "果郡王欣赏你的坦诚，圣眷+2。", followupType: "guo_honest" },
+                    { text: "送礼讨好", score: 0, money: -30, msg: "你送了一幅名画，果郡王婉拒，银两-30。", followupType: "guo_gift" },
+                    { text: "敷衍了事", score: -1, money: 0, msg: "果郡王不满离去，圣眷-1。", followupType: "guo_ignore" }
+                ] }
+            ];
+            
+            const FOLLOWUP_EVENTS = {
+                an_kind: [ { title: "🙏 安陵容报恩", desc: "安陵容得宠后，在皇上面前举荐你，圣眷大增。", score: 2, money: 10, msg: "圣眷+2，银两+10。" }, { title: "⚠️ 皇后迁怒", desc: "安陵容投靠皇后后反咬你一口，你被罚俸。", score: -3, money: -20, msg: "圣眷-3，银两-20。" } ],
+                an_strict: [ { title: "📝 匿名举报", desc: "有人举报你收受安陵容贿赂，虽查无实据但名声受损。", score: -1, money: 0, msg: "圣眷-1。" }, { title: "🏅 廉洁嘉奖", desc: "皇上听闻你公正，特赐匾额。", score: 2, money: 0, msg: "圣眷+2。" } ],
+                hua_accept: [ { title: "🔥 华妃倒台受牵连", desc: "华妃失势，你被查出曾受贿，打入慎刑司。", score: -4, money: -100, msg: "圣眷-4，银两-100。" } ],
+                hua_refuse: [ { title: "👑 升任内务府总管", desc: "皇上破格提拔你，众人侧目。", score: 3, money: 0, msg: "圣眷+3。" } ],
+                hua_betray: [ { title: "🤝 甄嬛党羽", desc: "甄嬛视你为心腹，日后多有照拂。", score: 2, money: 0, msg: "圣眷+2。" } ],
+                zhen_thank: [ { title: "📖 莞贵人引荐", desc: "甄嬛将你引荐给端妃，人脉大开。", score: 2, money: 0, msg: "圣眷+2。" } ],
+                zhen_ignore: [ { title: "😨 选秀事故", desc: "因未防范，选秀出现丑闻，你被罚半年俸禄。", score: -2, money: -50, msg: "圣眷-2，银两-50。" } ],
+                zhen_betray: [ { title: "👑 皇后弃子", desc: "皇后用完你后便将你抛弃，无人敢援。", score: -3, money: -30, msg: "圣眷-3，银两-30。" } ],
+                empress_refuse: [ { title: "🕊️ 太后赞赏", desc: "太后得知你拒绝皇后，私下嘉奖。", score: 2, money: 20, msg: "圣眷+2，银两+20。" } ],
+                empress_betray: [ { title: "🏆 扳倒皇后之功", desc: "甄嬛凭你证据扳倒皇后，你获封赏。", score: 4, money: 100, msg: "圣眷+4，银两+100。" } ],
+                empress_accept: [ { title: "💀 皇后弃车保帅", desc: "东窗事发，皇后将你推出顶罪，打入冷宫。", score: -5, money: -150, msg: "圣眷-5，银两-150。" } ],
+                nian_accept: [ { title: "🔗 年党余孽", desc: "年羹尧倒台后你被清算，流放宁古塔。", score: -3, money: -80, msg: "圣眷-3，银两-80。" } ],
+                nian_refuse: [ { title: "🎖️ 御赐黄马褂", desc: "皇上御赐黄马褂，百官敬仰。", score: 3, money: 0, msg: "圣眷+3。" } ],
+                nian_donate: [ { title: "📜 青史留名", desc: "你的义举被载入史册，后世称颂。", score: 2, money: 0, msg: "圣眷+2。" } ],
+                guo_honest: [ { title: "🌙 果郡王举荐", desc: "果郡王向皇上推荐你，仕途亨通。", score: 2, money: 0, msg: "圣眷+2。" } ],
+                guo_gift: [ { title: "🎨 画作风波", desc: "名画被查出是赝品，果郡王不悦。", score: -1, money: -30, msg: "圣眷-1，银两-30。" } ],
+                guo_ignore: [ { title: "📉 王爷冷眼", desc: "果郡王对你印象极差，处处掣肘。", score: -2, money: 0, msg: "圣眷-2。" } ]
+            };
+            
+            const PHOTOS = ["柳叶眉 樱唇","丹凤眼 泪痣","圆脸 酒窝","鹅蛋脸 浅笑","清瘦 书卷气","娇憨 福相","清冷 寡言","艳丽 桃花妆"];
+            const FINGER_CODES = ["玉环纹-2371","梅花纹-8452","云纹-5603","水纹-9127","竹纹-3480","雀纹-6739"];
+            const FIRST_NAMES = ["甄氏","年氏","沈氏","安氏","瓜尔佳氏","叶赫那拉氏","乌拉那拉氏","曹氏","方氏","夏氏"];
+            const LAST_NAMES = ["玉娆","世兰","眉庄","陵容","文鸳","澜依","宜修","琴默","淳儿","常在"];
+            const ID_POOL_PREFIX = ["选字","秀字","宫字","内字","承字"];
+            const ILLEGAL_CITIES = ["冷宫偏殿","辛者库","慎刑司","浣衣局"];
+            
+            function getRandomElement(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+            function randomInt(min,max) { return Math.floor(Math.random()*(max-min+1))+min; }
+            function generateRandomName() { return `${getRandomElement(FIRST_NAMES)}·${getRandomElement(LAST_NAMES)}`; }
+            function generateRandomID() { return `${getRandomElement(ID_POOL_PREFIX)}-${randomInt(1000,9999)}`; }
+            function generateRandomPhoto() { return getRandomElement(PHOTOS); }
+            function generateRandomFinger() { return getRandomElement(FINGER_CODES); }
+            function generateValidExpiry() { return `1715-${String(randomInt(1,12)).padStart(2,'0')}-${String(randomInt(1,28)).padStart(2,'0')}`; }
+            function generateExpiredExpiry() { return `1714-${String(randomInt(1,12)).padStart(2,'0')}-${String(randomInt(1,28)).padStart(2,'0')}`; }
+            function isExpiryValid(expiry) { return expiry >= CURRENT_DATE; }
+            
+            function selectDailyEffect() { return { ...DAILY_EFFECTS[randomInt(0, DAILY_EFFECTS.length-1)] }; }
+            function applyScoreModifier(delta, isCorrect) { if(!dailyEffect || !dailyEffect.effect) return delta; return dailyEffect.effect(delta, isCorrect); }
+            
+            function generateValidApplicant() {
+                const name = generateRandomName(); const id = generateRandomID(); const photo = generateRandomPhoto(); const finger = generateRandomFinger();
+                return { declaration: { name, id, photo, finger }, document: { name, id, photo, finger, expiry: generateValidExpiry(), issueCity: LEGAL_CITY } };
+            }
+            function generateErroneousApplicant(validBase) {
+                let faultyDecl = { ...validBase.declaration }; let faultyDoc = { ...validBase.document };
+                let errorCount = randomInt(1, MAX_ERRORS); if(extraCheckFlag) errorCount = Math.min(MAX_ERRORS, errorCount + 1);
+                const errorTypes = []; while(errorTypes.length < errorCount) { let err = randomInt(0,5); if(!errorTypes.includes(err)) errorTypes.push(err); }
+                for(let err of errorTypes) {
+                    switch(err) {
+                        case 0: let newName = generateRandomName(); while(newName === faultyDecl.name) newName = generateRandomName(); faultyDoc.name = newName; break;
+                        case 1: let newId = generateRandomID(); while(newId === faultyDecl.id) newId = generateRandomID(); faultyDoc.id = newId; break;
+                        case 2: let newPhoto = generateRandomPhoto(); while(newPhoto === faultyDecl.photo) newPhoto = generateRandomPhoto(); faultyDoc.photo = newPhoto; break;
+                        case 3: let newFinger = generateRandomFinger(); while(newFinger === faultyDecl.finger) newFinger = generateRandomFinger(); faultyDoc.finger = newFinger; break;
+                        case 4: faultyDoc.expiry = generateExpiredExpiry(); break;
+                        case 5: faultyDoc.issueCity = getRandomElement(ILLEGAL_CITIES); break;
+                    }
+                }
+                return { declaration: faultyDecl, document: faultyDoc };
+            }
+            function generateApplicant() {
+                const isLegal = Math.random() < LEGAL_PROBABILITY;
+                const validBase = generateValidApplicant();
+                const applicantData = isLegal ? validBase : generateErroneousApplicant(validBase);
+                const { declaration, document } = applicantData;
+                let shouldApprove = (declaration.name === document.name && declaration.id === document.id && declaration.photo === document.photo && declaration.finger === document.finger && isExpiryValid(document.expiry) && document.issueCity === LEGAL_CITY);
+                if(wantedList.length > 0 && (wantedList.includes(declaration.name) || wantedList.includes(document.name))) shouldApprove = false;
+                if(tempRuleOverride) { const { field, condition } = tempRuleOverride; if(field === 'city' && document.issueCity === condition) shouldApprove = false; if(field === 'expiry' && !isExpiryValid(document.expiry)) shouldApprove = false; }
+                if(lenses > 0 && !shouldApprove) {
+                    let hint = ""; if(declaration.name !== document.name) hint = "⚠️ 提示：闺名不符"; else if(declaration.id !== document.id) hint = "⚠️ 提示：名帖编号不符"; else if(declaration.photo !== document.photo) hint = "⚠️ 提示：画像特征不符"; else if(declaration.finger !== document.finger) hint = "⚠️ 提示：指印纹路不符"; else if(!isExpiryValid(document.expiry)) hint = "⚠️ 提示：名帖已过期"; else if(document.issueCity !== LEGAL_CITY) hint = "⚠️ 提示：签发宝玺不符"; else hint = "⚠️ 提示：所有信息一致，但可能另有隐情";
+                    lenses--; stats.lensUsed++; updateItemUI(); feedbackDiv.innerHTML = `🔍 ${hint}<br>${feedbackDiv.innerHTML}`;
+                }
+                return { declaration, document, shouldApprove };
+            }
+            
+            let currentOfficerName = "", currentApplicant = null, score = 0, money = 0, processedCount = 0, gameActive = true;
+            let consecutiveCorrect = 0, consecutiveWrong = 0, currentDay = 1, dailyEffect = null, extraCheckFlag = false, bribeBoostFlag = false;
+            let activeEvent = null, wantedList = [], tempRuleOverride = null, amulets = 0, lenses = 0, bribeExempt = 0;
+            let playerChoices = { an_kind:false, an_strict:false, hua_accept:false, hua_refuse:false, hua_betray:false, zhen_thank:false, zhen_ignore:false, zhen_betray:false, empress_refuse:false, empress_betray:false, empress_accept:false, nian_accept:false, nian_refuse:false, nian_donate:false, guo_honest:false, guo_gift:false, guo_ignore:false };
+            let followupTriggered = new Set(), motherForced = false;
+            let stats = { totalDecisions:0, correctDecisions:0, totalBribesTaken:0, totalBribesRefused:0, amuletUsed:0, lensUsed:0, itemsBought:{ amulet:0, lens:0, exempt:0 }, eventsTriggered:new Set(), consecutiveCorrectMax:0, consecutiveWrongMax:0, kindnessChoices:0 };
+            
+            function renderApplicant(applicant) {
+                declNameSpan.innerText = applicant.declaration.name; declIDSpan.innerText = applicant.declaration.id;
+                declPhotoSpan.innerText = applicant.declaration.photo; declFingerSpan.innerText = applicant.declaration.finger;
+                docNameSpan.innerText = applicant.document.name; docIDSpan.innerText = applicant.document.id;
+                docPhotoSpan.innerText = applicant.document.photo; docFingerSpan.innerText = applicant.document.finger;
+                docExpirySpan.innerText = applicant.document.expiry; docIssueSpan.innerText = applicant.document.issueCity;
+            }
+            function updateStatsUI() { scoreSpan.innerText = score; moneySpan.innerText = money; caseCounterSpan.innerText = processedCount; totalCasesSpan.innerText = TOTAL_CASES; dayInfoSpan.innerText = `第 ${currentDay} / ${TOTAL_DAYS} 日`; updateItemUI(); }
+            function updateItemUI() { amuletCountSpan.innerText = amulets; lensCountSpan.innerText = lenses; bribeExemptSpan.innerText = bribeExempt; }
+            
+            function tryTriggerFollowup() {
+                if(processedCount < 10) return;
+                let possibleTypes = []; for(let key in playerChoices) { if(playerChoices[key] && !followupTriggered.has(key) && FOLLOWUP_EVENTS[key]) possibleTypes.push(key); }
+                if(possibleTypes.length === 0) return; if(Math.random() > 0.35) return;
+                const chosenType = getRandomElement(possibleTypes); const followupList = FOLLOWUP_EVENTS[chosenType]; if(followupList && followupList.length > 0) {
+                    const event = getRandomElement(followupList); followupTriggered.add(chosenType); activeEvent = { resolved: false };
+                    eventArea.style.display = "block"; let html = `<strong>⚡ ${event.title}</strong><br>${event.desc}<div class="event-buttons"><button class="event-btn" data-score="${event.score}" data-money="${event.money}" data-msg="${event.msg}">继续</button></div>`;
+                    eventArea.innerHTML = html; document.querySelectorAll('.event-btn').forEach(btn => { btn.onclick = () => { score += parseInt(btn.dataset.score); if(score<0) score=0; money += parseInt(btn.dataset.money); if(money<0) money=0; updateStatsUI(); feedbackDiv.innerHTML = `✨ ${btn.dataset.msg}`; activeEvent.resolved = true; eventArea.style.display = "none"; activeEvent = null; }; });
+                }
+            }
+            function showEvent(eventData) {
+                activeEvent = { ...eventData, resolved: false }; stats.eventsTriggered.add(eventData.type); eventArea.style.display = "block";
+                let html = `<strong>⚡ ${eventData.title}</strong><br>${eventData.desc}<div class="event-buttons">`;
+                eventData.options.forEach((opt, idx) => { html += `<button class="event-btn" data-opt="${idx}">${opt.text}</button>`; });
+                html += `</div>`; eventArea.innerHTML = html;
+                document.querySelectorAll('.event-btn').forEach(btn => { btn.onclick = () => { const optIdx = parseInt(btn.dataset.opt); const chosen = eventData.options[optIdx]; score += chosen.score; money += chosen.money; if(score<0) score=0; if(money<0) money=0; updateStatsUI(); feedbackDiv.innerHTML = `✨ ${chosen.msg}`; if(eventData.type === "anlingrong" && optIdx === 0) stats.kindnessChoices++; if(chosen.kindness) stats.kindnessChoices++; if(eventData.type === "huafei" && optIdx === 0) stats.totalBribesTaken++; if(eventData.type === "huafei" && optIdx === 1) stats.totalBribesRefused++; if(chosen.followupType) playerChoices[chosen.followupType] = true; activeEvent.resolved = true; eventArea.style.display = "none"; activeEvent = null; tryTriggerFollowup(); }; });
+            }
+            function triggerAdvancedEvent() { if(processedCount >= TOTAL_CASES) return; if(activeEvent) return; if(!motherForced && processedCount >= 15) { motherForced = true; const motherEvent = ADVANCED_EVENTS.find(e => e.type === "anlingrong"); if(motherEvent) { showEvent(motherEvent); return; } } let rate = EVENT_TRIGGER_RATE; if(bribeBoostFlag) rate = Math.min(0.9, rate + 0.2); if(Math.random() > rate) return; showEvent(getRandomElement(ADVANCED_EVENTS)); }
+            function endOfDay() { if(currentDay >= TOTAL_DAYS) return; feedbackDiv.innerHTML = `📆 第 ${currentDay} 日结束！本日圣眷: ${score}，私库: ${money}。进入第 ${currentDay+1} 日。`; consecutiveCorrect = 0; consecutiveWrong = 0; currentDay++; extraCheckFlag = false; bribeBoostFlag = false; applyDailyEffect(); updateStatsUI(); currentApplicant = generateApplicant(); renderApplicant(currentApplicant); }
+            function applyDailyEffect() { dailyEffect = selectDailyEffect(); extraCheckFlag = dailyEffect.extraCheck || false; bribeBoostFlag = dailyEffect.bribeBoost || false; if(dailyEffect.startMoney) { money += dailyEffect.startMoney; feedbackDiv.innerHTML = `🎁 ${dailyEffect.name}：获得 ${dailyEffect.startMoney} 两。`; updateStatsUI(); } dailyEffectArea.style.display = "block"; dailyEffectArea.innerHTML = `📅 第 ${currentDay} 日 · ${dailyEffect.name}：${dailyEffect.desc}`; setTimeout(() => { dailyEffectArea.style.opacity = "0.8"; }, 3000); if(tempRuleOverride) { decreeWarning.style.display = "block"; decreeWarning.innerHTML = `⚠️ 临时法令：${tempRuleOverride.message || "请核对签发宝玺"} ⚠️`; } else { decreeWarning.style.display = "none"; } }
+            function handleDecision(action) { if(!gameActive || processedCount >= TOTAL_CASES) return; if(activeEvent && !activeEvent.resolved) { feedbackDiv.innerHTML = "⚠️ 请先处理当前事件！"; return; } if(!currentApplicant) { nextApplicant(); return; } const shouldApprove = currentApplicant.shouldApprove; let isCorrect = false, baseDelta = 0, detailMsg = ""; if((action === 'approve' && shouldApprove) || (action === 'reject' && !shouldApprove)) { isCorrect = true; baseDelta = 1; detailMsg = action === 'approve' ? "✅ 正确赐花入选" : "✅ 正确撂牌子"; } else { isCorrect = false; baseDelta = -1; detailMsg = action === 'approve' ? "❌ 错误入选" : "❌ 错误拒绝"; } stats.totalDecisions++; if(isCorrect) stats.correctDecisions++; let finalDelta = baseDelta; if(!isCorrect && amulets > 0) { finalDelta = 0; amulets--; stats.amuletUsed++; updateItemUI(); detailMsg += " (护身符生效，抵消圣眷折损)"; } finalDelta = applyScoreModifier(finalDelta, isCorrect); let auditBonus = 0; if(isCorrect) { consecutiveCorrect++; consecutiveWrong = 0; if(consecutiveCorrect >= 2) { auditBonus = 1; detailMsg += " + 连对嘉奖 +1⭐"; consecutiveCorrect = 0; } if(consecutiveCorrect > stats.consecutiveCorrectMax) stats.consecutiveCorrectMax = consecutiveCorrect; } else { consecutiveWrong++; consecutiveCorrect = 0; if(consecutiveWrong >= 2) { auditBonus = -1; detailMsg += " + 连错问责 -1⭐"; consecutiveWrong = 0; } if(consecutiveWrong > stats.consecutiveWrongMax) stats.consecutiveWrongMax = consecutiveWrong; } let totalDelta = finalDelta + auditBonus; score += totalDelta; if(score < 0) score = 0; processedCount++; updateStatsUI(); feedbackDiv.innerHTML = `${detailMsg} (${baseDelta>0?`+${baseDelta}`:baseDelta}分${auditBonus!==0?` ${auditBonus>0?'+'+auditBonus:auditBonus}分`:''}) 当前圣眷:${score} 进度:${processedCount}/${TOTAL_CASES}`; if(processedCount % DAY_CASES === 0 && processedCount !== 0 && processedCount < TOTAL_CASES) { endOfDay(); return; } if(processedCount >= TOTAL_CASES) { endGame(); return; } triggerAdvancedEvent(); nextApplicant(); }
+            function nextApplicant() { if(!gameActive || processedCount >= TOTAL_CASES) { if(processedCount>=TOTAL_CASES) endGame(); return; } currentApplicant = generateApplicant(); renderApplicant(currentApplicant); }
+            function calculateEnding() { let rating = "", title = "", desc = ""; if (money >= 200 && score <= 8) { rating = "F"; title = "🚨 锒铛入狱"; desc = "你大肆敛财，中饱私囊，最终东窗事发。调查组查获巨额赃款，你被免职并移送司法机关，后半生将在牢狱中度过。"; } else if (score >= 22 && money <= 30) { rating = "S+"; title = "🏅 光荣晋升"; desc = "你以绝对的公正与智慧守护选秀公正，政绩斐然。上级破格提拔你为内务府总管，前途无量，后宫敬仰。"; } else if (score >= 20 && money <= 80) { rating = "A"; title = "⭐ 廉洁楷模"; desc = "你坚守原则，不贪不腐，赢得了皇上的信任。仕途光明，被列为重点培养对象。"; } else if (score >= 12 && score <= 19) { rating = "B"; title = "📋 平庸官僚"; desc = "你按部就班，无功无过，在体制内默默无闻。既无大功，也无大过。"; } else if (money >= 120 && score <= 12) { rating = "C"; title = "💰 贪腐局长"; desc = "你大肆敛财，虽富甲一方，却声名狼藉，被御史弹劾，仕途终结。"; } else if (score <= 5) { rating = "D"; title = "😵 背锅侠"; desc = "你屡屡犯错，被当作替罪羊革职查办，无人同情。"; } else { rating = "B"; title = "📋 平庸官僚"; desc = "你按部就班，无功无过，在体制内默默无闻。"; } let achievements = []; if(stats.totalBribesRefused >= 5) achievements.push("⚖️ 铁面判官"); if(money >= 200) achievements.push("💵 商业鬼才"); if(stats.lensUsed >= 10) achievements.push("🔍 福尔摩斯"); if(stats.amuletUsed >= 5) achievements.push("🛡️ 护符狂魔"); if(stats.itemsBought.amulet>0 && stats.itemsBought.lens>0 && stats.itemsBought.exempt>0) achievements.push("🎁 全收集者"); if(stats.eventsTriggered.size >= 6) achievements.push("🌍 事件达人"); if(stats.consecutiveCorrectMax >= 5) achievements.push("🎯 审判大师"); if(stats.kindnessChoices >= 2) achievements.push("🕊️ 慈悲者"); if(achievements.length > 0) title += ` (${achievements.slice(0,3).join(", ")})`; return { rating, title, desc, achievements }; }
+            function endGame() { gameActive = false; approveBtn.disabled = true; rejectBtn.disabled = true; const correctRate = stats.totalDecisions === 0 ? 0 : Math.round((stats.correctDecisions / stats.totalDecisions) * 100); const ending = calculateEnding(); let html = `<div class="end-report"><h3>📜 任期总结 · ${ending.title}</h3><p>⭐ 最终圣眷: ${score} / ${TOTAL_CASES}<br>💰 私库银两: ${money}<br>✅ 正确率: ${stats.correctDecisions}/${stats.totalDecisions} (${correctRate}%)<br>📊 ${ending.desc}</p>`; if(ending.achievements.length > 0) { html += `<div class="achievement-list">🏅 解锁成就: ${ending.achievements.join(" · ")}</div>`; } html += `<p style="margin-top:12px;">✨ 再次点击「重启选秀任期」可尝试其他结局 ✨</p></div>`; feedbackDiv.innerHTML = html; }
+            function resetGame() { currentOfficerName = `${getRandomElement(FIRST_NAMES)}·${getRandomElement(LAST_NAMES)}`; officerNameSpan.innerText = currentOfficerName; score = 0; money = 0; processedCount = 0; gameActive = true; consecutiveCorrect = 0; consecutiveWrong = 0; wantedList = []; tempRuleOverride = null; amulets = 0; lenses = 0; bribeExempt = 0; activeEvent = null; eventArea.style.display = "none"; approveBtn.disabled = false; rejectBtn.disabled = false; currentDay = 1; extraCheckFlag = false; bribeBoostFlag = false; motherForced = false; for(let k in playerChoices) playerChoices[k] = false; followupTriggered.clear(); stats = { totalDecisions:0, correctDecisions:0, totalBribesTaken:0, totalBribesRefused:0, amuletUsed:0, lensUsed:0, itemsBought:{ amulet:0, lens:0, exempt:0 }, eventsTriggered:new Set(), consecutiveCorrectMax:0, consecutiveWrongMax:0, kindnessChoices:0 }; applyDailyEffect(); currentApplicant = generateApplicant(); renderApplicant(currentApplicant); updateStatsUI(); feedbackDiv.innerHTML = "🛂 新选秀任期开始，后宫风云再起！"; }
+            
+            const officerNameSpan = document.getElementById("officerName"); const scoreSpan = document.getElementById("scoreValue"); const moneySpan = document.getElementById("moneyValue"); const caseCounterSpan = document.getElementById("caseCounter"); const totalCasesSpan = document.getElementById("totalCasesSpan"); const dayInfoSpan = document.getElementById("dayInfo"); const approveBtn = document.getElementById("approveBtn"); const rejectBtn = document.getElementById("rejectBtn"); const resetBtn = document.getElementById("resetBtn"); const feedbackDiv = document.getElementById("feedbackMsg"); const eventArea = document.getElementById("dynamicEventArea"); const dailyEffectArea = document.getElementById("dailyEffectArea"); const decreeWarning = document.getElementById("decreeWarning"); const amuletCountSpan = document.getElementById("amuletCount"); const lensCountSpan = document.getElementById("lensCount"); const bribeExemptSpan = document.getElementById("bribeExemptCount"); const declNameSpan = document.getElementById("declName"); const declIDSpan = document.getElementById("declID"); const declPhotoSpan = document.getElementById("declPhoto"); const declFingerSpan = document.getElementById("declFinger"); const docNameSpan = document.getElementById("docName"); const docIDSpan = document.getElementById("docID"); const docPhotoSpan = document.getElementById("docPhoto"); const docFingerSpan = document.getElementById("docFinger"); const docExpirySpan = document.getElementById("docExpiry"); const docIssueSpan = document.getElementById("docIssue");
+            
+            const modal = document.getElementById("shopModal"); const shopBtn = document.getElementById("shopBtn"); const closeModal = document.getElementById("closeModal"); const buyAmulet = document.getElementById("buyAmulet"); const buyLens = document.getElementById("buyLens"); const buyExempt = document.getElementById("buyExempt");
+            function openShop() { modal.style.display = "flex"; } function closeShop() { modal.style.display = "none"; }
+            shopBtn.onclick = openShop; closeModal.onclick = closeShop; window.onclick = (e) => { if(e.target === modal) closeShop(); };
+            buyAmulet.onclick = () => { if(money >= 30) { money -= 30; amulets++; stats.itemsBought.amulet++; updateStatsUI(); feedbackDiv.innerHTML = "🛡️ 购买护身符成功！"; closeShop(); } else alert("银两不足！"); };
+            buyLens.onclick = () => { if(money >= 20) { money -= 20; lenses += 3; stats.itemsBought.lens++; updateStatsUI(); feedbackDiv.innerHTML = "🔍 购买洞察之眼成功！"; closeShop(); } else alert("银两不足！"); };
+            buyExempt.onclick = () => { if(money >= 40) { money -= 40; bribeExempt++; stats.itemsBought.exempt++; updateStatsUI(); feedbackDiv.innerHTML = "💰 购买密折特权成功！"; closeShop(); } else alert("银两不足！"); };
+            
+            approveBtn.addEventListener("click", () => { if(gameActive) handleDecision('approve'); });
+            rejectBtn.addEventListener("click", () => { if(gameActive) handleDecision('reject'); });
+            resetBtn.addEventListener("click", resetGame);
+            
+            const startBtn = document.getElementById("startGameBtn");
+            const introOverlay = document.getElementById("introOverlay");
+            const gameContainer = document.getElementById("gameContainer");
+            startBtn.addEventListener("click", () => {
+                introOverlay.style.display = "none";
+                gameContainer.style.display = "block";
+                resetGame();
+            });
+        })();
+    </script>
+</body>
+</html>

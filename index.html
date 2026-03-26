@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>边境模拟器 - 事件后续·固定数值·30案件</title>
+    <title>边境模拟器 - 事件后续·30案件·极端结局</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -83,7 +83,7 @@
             transform: translateY(2px);
             box-shadow: 0 1px 0 #1e462f;
         }
-        /* 游戏主容器样式（与最终版完全一致） */
+        /* 游戏主容器样式 */
         .game-container {
             max-width: 1000px;
             width: 100%;
@@ -404,7 +404,7 @@
     </div>
 
     <script>
-        // ========== 游戏完整逻辑（与最终版一致，并添加开篇控制）==========
+        // ========== 游戏完整逻辑 ==========
         (function() {
             // ---------- 配置 ----------
             const DAY_CASES = 5;
@@ -907,35 +907,55 @@
                 renderApplicant(currentApplicant);
             }
             
+            // ========== 优化后的结局函数 ==========
             function calculateEnding() {
                 let rating = "";
                 let title = "";
                 let desc = "";
-                if(score >= 24 && money <= 40) {
-                    rating = "S";
-                    title = "🏆 边境守护神";
-                    desc = "你以绝对的公正与智慧守护国门，民众敬仰，上级嘉奖。边境因你而安。";
-                } else if(score >= 20 && money <= 80) {
+                
+                // 极端贪腐：赃款极高且评分极低
+                if (money >= 200 && score <= 8) {
+                    rating = "F";
+                    title = "🚨 锒铛入狱";
+                    desc = "你大肆敛财，中饱私囊，最终东窗事发。调查组查获巨额赃款，你被免职并移送司法机关，后半生将在牢狱中度过。";
+                }
+                // 极端廉洁：评分极高且赃款极低
+                else if (score >= 22 && money <= 30) {
+                    rating = "S+";
+                    title = "🏅 光荣晋升";
+                    desc = "你以绝对的公正与智慧守护国门，政绩斐然。上级破格提拔你为边境总局副局长，前途无量，民众敬仰。";
+                }
+                // 高分低贪
+                else if (score >= 20 && money <= 80) {
                     rating = "A";
                     title = "⭐ 廉洁楷模";
-                    desc = "你坚守原则，不贪不腐，赢得了人民的信任。仕途光明。";
-                } else if(score >= 12 && score <= 19) {
+                    desc = "你坚守原则，不贪不腐，赢得了人民的信任。仕途光明，被列为重点培养对象。";
+                }
+                // 中等表现
+                else if (score >= 12 && score <= 19) {
                     rating = "B";
                     title = "📋 平庸官僚";
-                    desc = "你按部就班，无功无过，在体制内默默无闻。";
-                } else if(money >= 150 && score <= 15) {
+                    desc = "你按部就班，无功无过，在体制内默默无闻。既无大功，也无大过。";
+                }
+                // 贪腐但不严重
+                else if (money >= 120 && score <= 12) {
                     rating = "C";
                     title = "💰 贪腐局长";
-                    desc = "你大肆敛财，虽富甲一方，却声名狼藉，终被调查。";
-                } else if(score <= 6) {
+                    desc = "你大肆敛财，虽富甲一方，却声名狼藉，被纪委约谈，仕途终结。";
+                }
+                // 表现极差
+                else if (score <= 5) {
                     rating = "D";
                     title = "😵 背锅侠";
-                    desc = "你屡屡犯错，被当作替罪羊革职查办。";
-                } else {
+                    desc = "你屡屡犯错，被当作替罪羊革职查办，无人同情。";
+                }
+                // 默认
+                else {
                     rating = "B";
                     title = "📋 平庸官僚";
                     desc = "你按部就班，无功无过，在体制内默默无闻。";
                 }
+                
                 let achievements = [];
                 if(stats.totalBribesRefused >= 5) achievements.push("⚖️ 铁面判官");
                 if(money >= 200) achievements.push("💵 商业鬼才");
@@ -1018,14 +1038,14 @@
             rejectBtn.addEventListener("click", () => { if(gameActive) handleDecision('reject'); });
             resetBtn.addEventListener("click", resetGame);
             
-            // 开篇控制：点击开始游戏后隐藏遮罩并显示游戏主容器，然后初始化游戏
+            // 开篇控制
             const startBtn = document.getElementById("startGameBtn");
             const introOverlay = document.getElementById("introOverlay");
             const gameContainer = document.getElementById("gameContainer");
             startBtn.addEventListener("click", () => {
                 introOverlay.style.display = "none";
                 gameContainer.style.display = "block";
-                resetGame();   // 确保游戏从初始状态开始
+                resetGame();
             });
         })();
     </script>

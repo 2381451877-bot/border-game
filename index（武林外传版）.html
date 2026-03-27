@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>同福客栈 · 入境审查模拟器 | 武林外传版</title>
+    <style>
+        * { box-sizing: border-box; user-select: none; }
+        body {
+            background: linear-gradient(145deg, #2b241c 0%, #1c1610 100%);
+            font-family: 'Courier New', '华文楷书', 'KaiTi', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.88);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        .intro-card {
+            background: #e9dbc5;
+            border: 4px solid #b87c3c;
+            border-radius: 48px;
+            max-width: 550px;
+            width: 90%;
+            padding: 30px 28px;
+            text-align: center;
+            color: #3a2c1f;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            font-family: monospace;
+        }
+        .intro-card h1 {
+            margin-top: 0;
+            font-size: 2rem;
+            letter-spacing: 4px;
+            border-bottom: 3px solid #b87c3c;
+            display: inline-block;
+            padding-bottom: 8px;
+            font-family: '华文楷书', 'KaiTi', monospace;
+            color: #8b5a2b;
+        }
+        .intro-card p {
+            font-size: 1rem;
+            line-height: 1.5;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .intro-card ul {
+            text-align: left;
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+        .intro-card li {
+            margin: 8px 0;
+            list-style-type: "🍜 ";
+        }
+        .start-btn {
+            background: #c28a40;
+            color: #2f2216;
+            border: none;
+            font-size: 1.3rem;
+            padding: 12px 32px;
+            border-radius: 60px;
+            cursor: pointer;
+            font-family: monospace;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: 0.1s linear;
+            box-shadow: 0 4px 0 #7e562a;
+        }
+        .start-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #7e562a;
+        }
+        .game-container {
+            max-width: 1100px;
+            width: 100%;
+            background: #f7f0e2;
+            border-radius: 48px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.6);
+            border: 2px solid #d6a15a;
+            overflow: hidden;
+            font-family: 'Courier New', '华文楷书', monospace;
+        }
+        .header {
+            background: #6d4c2e;
+            padding: 12px 24px;
+            border-bottom: 4px solid #e7b874;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            color: #ffefcf;
+        }
+        .officer-info { background: #4f351f; padding: 5px 18px; border-radius: 40px; color: #fae7b3; font-weight: bold; }
+        .officer-name { color: #ffd98c; font-size: 1.1rem; }
+        .stats { display: flex; gap: 20px; background: #4f351f; padding: 5px 18px; border-radius: 40px; flex-wrap: wrap; }
+        .stat span:first-child { color: #ffdead; }
+        .stat span:last-child { color: #ffd966; margin-left: 6px; font-weight: bold; }
+        .day-info {
+            background: #2b1e12;
+            padding: 4px 16px;
+            border-radius: 30px;
+            font-weight: bold;
+            color: #ffde9c;
+            border: 1px solid #e7b874;
+        }
+        .rule-panel {
+            background: #e7dbbc;
+            padding: 10px 20px;
+            font-size: 0.7rem;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #c2a15b;
+            color: #3b2a1a;
+        }
+        .rule-list { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+        .rule-list li {
+            background: #faf0db;
+            padding: 2px 14px;
+            border-radius: 30px;
+            border-left: 4px solid #c9a53b;
+            font-weight: 600;
+        }
+        .date-badge {
+            background: #b68648;
+            padding: 2px 12px;
+            border-radius: 30px;
+            color: #fff0cc;
+            font-weight: bold;
+        }
+        .daily-effect {
+            background: #ebddb0;
+            margin: 8px 20px;
+            padding: 6px 15px;
+            border-radius: 40px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #5a3f1c;
+            border-left: 5px solid #e6b422;
+            font-weight: bold;
+        }
+        .event-area {
+            background: #fff1dc;
+            margin: 12px 20px;
+            padding: 14px 18px;
+            border-radius: 36px;
+            text-align: center;
+            color: #5c401f;
+            border: 2px solid #e2b062;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .event-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .event-btn {
+            background: #b87c3c;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            color: #fff2df;
+            transition: 0.1s;
+        }
+        .event-btn:active { transform: scale(0.96); }
+        .inspection-area { padding: 20px; background: #fdf6e8; }
+        .applicant-title {
+            text-align: center;
+            font-size: 1rem;
+            color: #8b5a2b;
+            border-bottom: 2px dashed #d6b575;
+            display: inline-block;
+            width: auto;
+            margin: 0 auto 20px;
+            padding-bottom: 5px;
+            font-weight: bold;
+        }
+        .card-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        .card {
+            flex: 1;
+            min-width: 280px;
+            background: #fff6ea;
+            border-radius: 32px;
+            padding: 18px;
+            box-shadow: 8px 8px 0 #cfa86a;
+            border: 1px solid #e9cf9e;
+        }
+        .card h3 { margin: 0 0 12px; font-size: 1rem; text-align: center; border-bottom: 2px solid #e6bf7a; color: #9b6a2c; }
+        .info-row { margin: 8px 0; display: flex; font-size: 0.85rem; border-bottom: 1px dotted #e1c894; padding: 4px 0; }
+        .info-label { font-weight: bold; width: 85px; color: #b57630; }
+        .info-value { font-weight: 600; color: #2f2a1f; flex: 1; word-break: break-word; }
+        .warning-note { background: #f7ebcf; font-size: 0.7rem; text-align: center; margin-top: 12px; padding: 5px; border-radius: 30px; color: #aa6f2c; }
+        .action-area { display: flex; justify-content: center; gap: 30px; margin: 20px; }
+        button {
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 10px 28px;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #6d4c2e;
+            background: #ab7a42;
+            color: #2f2216;
+        }
+        button:active { transform: translateY(2px); }
+        .approve-btn { background: #5b8c5a; box-shadow: 0 3px 0 #34623c; color: white; }
+        .reject-btn { background: #b56a4a; box-shadow: 0 3px 0 #793a22; color: white; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .feedback {
+            background: #e7dbbc;
+            margin: 5px 20px 20px;
+            padding: 12px;
+            text-align: center;
+            border-radius: 40px;
+            font-weight: bold;
+            border-left: 6px solid #e0b354;
+            color: #5c3f1c;
+        }
+        .bottom-bar {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 0 20px 20px;
+        }
+        .reset-btn, .shop-btn {
+            background: #aa7a44;
+            font-size: 1rem;
+            padding: 8px 24px;
+            box-shadow: 0 3px 0 #6b4a28;
+            flex: 1;
+        }
+        .shop-btn { background: #7c9f5e; box-shadow: 0 3px 0 #517238; color: white; }
+        .item-area {
+            background: #efe1c1;
+            margin: 0 20px 15px;
+            padding: 8px 20px;
+            border-radius: 40px;
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: #5e401e;
+        }
+        .item { background: #fef0da; padding: 4px 18px; border-radius: 40px; display: inline-block; font-weight: bold; }
+        footer { font-size: 0.65rem; text-align: center; color: #ab8a5a; padding: 10px; background: #f7f0e2; }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #fef3e2;
+            max-width: 400px;
+            width: 90%;
+            border-radius: 40px;
+            padding: 24px;
+            border: 3px solid #e6b44c;
+            color: #543e20;
+            font-family: monospace;
+        }
+        .modal-content h3 { margin-top: 0; text-align: center; color: #b16224; }
+        .shop-item { margin: 14px 0; display: flex; justify-content: space-between; align-items: center; }
+        .shop-item button { font-size: 0.8rem; padding: 4px 12px; background: #9e6f3e; color: white; }
+        .close-modal { background: #b76a44; margin-top: 18px; width: 100%; }
+        .end-report {
+            background: #fef0df;
+            margin: 5px 20px 20px;
+            padding: 18px;
+            border-radius: 36px;
+            text-align: center;
+            border: 2px solid #e6bb6e;
+            color: #4a341a;
+            line-height: 1.5;
+        }
+        .end-report h3 { margin: 0 0 10px; color: #bb7733; }
+        .achievement-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 12px; }
+        .decree-warning {
+            background: #c9885a;
+            color: #fff0cc;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
+    </style>
+</head>
+<body>
+<div id="introOverlay" class="intro-overlay">
+    <div class="intro-card">
+        <h1>🏮 同福客栈 · 入境审查 🏮</h1>
+        <p>欢迎，同福客栈的伙计！今日起你受佟掌柜指派，在七侠镇关口盘查来往江湖人士。必须核对「口供」与「通关文牒」是否吻合，谨防奸细、骗子与不速之客。</p>
+        <p>📜 六大核对法则（缺一不可）：</p>
+        <ul>
+            <li>✅ 姓名一致</li>
+            <li>✅ 江湖ID一致</li>
+            <li>✅ 相貌描述一致</li>
+            <li>✅ 暗号指纹一致</li>
+            <li>✅ 文牒有效期 ≥ 今日</li>
+            <li>✅ 签发地 = 七侠镇 (同福管辖)</li>
+        </ul>
+        <p>⚡ 随机事件考验你的情商与底线，每个选择都可能引来后续剧情！完成30件案子（6天任期），根据表现获得不同结局和武林外传专属成就。</p>
+        <p>🎭 你可能是：佟湘玉、白展堂、郭芙蓉、吕秀才、李大嘴…… 看命运安排！</p>
+        <button class="start-btn" id="startGameBtn">✨ 走你 ✨</button>
+    </div>
+</div>
+
+<div class="game-container" id="gameContainer" style="display: none;">
+    <div class="header">
+        <div class="officer-info">🛂 今日值班 · <span id="officerName" class="officer-name">--</span></div>
+        <div class="stats">
+            <div class="stat"><span>🍜 声誉值</span> <span id="scoreValue">0</span></div>
+            <div class="stat"><span>💰 私房钱</span> <span id="moneyValue">0</span></div>
+            <div class="stat"><span>📌 已查案件</span> <span id="caseCounter">0</span><span id="totalCasesSpan">/0</span></div>
+            <div class="day-info" id="dayInfo">第 1 / 6 日</div>
+        </div>
+    </div>
+    <div class="rule-panel">
+        <ul class="rule-list">
+            <li>✅ 姓名一致</li><li>✅ 江湖ID一致</li><li>✅ 相貌描述一致</li>
+            <li>✅ 暗号/指纹一致</li><li>✅ 文牒有效期 ≥ 今日</li><li>✅ 签发地 = 七侠镇</li>
+        </ul>
+        <div class="date-badge">📅 标准日: 乙酉年 腊月廿三</div>
+    </div>
+    <div id="dailyEffectArea" class="daily-effect" style="display: none;"></div>
+    <div id="decreeWarning" class="decree-warning" style="display: none; text-align: center; margin: 8px 20px;"></div>
+    <div id="dynamicEventArea" class="event-area" style="display: none;"></div>
+
+    <div class="inspection-area">
+        <div style="text-align:center;"><span class="applicant-title">✧ 江湖客·口供 vs 通关文牒 ✧</span></div>
+        <div class="card-grid">
+            <div class="card">
+                <h3>🗣️ 口 头 声 明</h3>
+                <div class="info-row"><span class="info-label">姓名</span><span class="info-value" id="declName">—</span></div>
+                <div class="info-row"><span class="info-label">江湖ID</span><span class="info-value" id="declID">—</span></div>
+                <div class="info-row"><span class="info-label">相貌描述</span><span class="info-value" id="declPhoto">—</span></div>
+                <div class="info-row"><span class="info-label">暗号指纹</span><span class="info-value" id="declFinger">—</span></div>
+                <div class="warning-note">⚠️ 此人自称如是说</div>
+            </div>
+            <div class="card">
+                <h3>📜 通 关 文 牒</h3>
+                <div class="info-row"><span class="info-label">姓名</span><span class="info-value" id="docName">—</span></div>
+                <div class="info-row"><span class="info-label">江湖ID</span><span class="info-value" id="docID">—</span></div>
+                <div class="info-row"><span class="info-label">相貌描述</span><span class="info-value" id="docPhoto">—</span></div>
+                <div class="info-row"><span class="info-label">暗号指纹</span><span class="info-value" id="docFinger">—</span></div>
+                <div class="info-row"><span class="info-label">文牒有效期</span><span class="info-value" id="docExpiry">—</span></div>
+                <div class="info-row"><span class="info-label">签发地</span><span class="info-value" id="docIssue">—</span></div>
+                <div class="warning-note">🔍 必须全部匹配六项法则</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-area">
+        <button class="approve-btn" id="approveBtn">✅ 准 入</button>
+        <button class="reject-btn" id="rejectBtn">⛔ 拒 之 门 外</button>
+    </div>
+
+    <div class="item-area" id="itemArea">
+        <span class="item">🛡️ 免罪护符: <span id="amuletCount">0</span></span>
+        <span class="item">🔍 盗圣放大镜: <span id="lensCount">0</span>次</span>
+        <span class="item">💰 贿赂豁免券: <span id="bribeExemptCount">0</span></span>
+    </div>
+
+    <div class="feedback" id="feedbackMsg">静待江湖客，同福有规矩。</div>
+    <div class="bottom-bar">
+        <button class="reset-btn" id="resetBtn">🔄 重开江湖</button>
+        <button class="shop-btn" id="shopBtn">🏪 老白私货铺</button>
+    </div>
+    <footer>六天任期·三十件案子·事件后续皆有因果·额滴神啊，认真点！</footer>
+</div>
+
+<div id="shopModal" class="modal">
+    <div class="modal-content">
+        <h3>🏪 白展堂私货小摊</h3>
+        <div class="shop-item">🛡️ 免罪护符 <span>抵消一次错误扣分</span> <button id="buyAmulet">买 (30💰)</button></div>
+        <div class="shop-item">🔍 盗圣放大镜 <span>每案提示一条疑点 (3次/份)</span> <button id="buyLens">买 (20💰)</button></div>
+        <div class="shop-item">💰 贿赂豁免券 <span>下次受贿不扣声誉</span> <button id="buyExempt">买 (40💰)</button></div>
+        <button class="close-modal" id="closeModal">关门放小郭</button>
+    </div>
+</div>
+
+<script>
+    (function(){
+        // ---------- 武林外传风格数据 ----------
+        const DAY_CASES = 5;
+        const TOTAL_DAYS = 6;
+        const TOTAL_CASES = DAY_CASES * TOTAL_DAYS;
+        const LEGAL_CITY = "七侠镇";
+        const LEGAL_PROBABILITY = 0.28;
+        const MAX_ERRORS = 4;
+        const EVENT_TRIGGER_RATE = 0.65;
+
+        const OFFICER_NAMES = ["佟湘玉", "白展堂", "郭芙蓉", "吕秀才", "李大嘴", "莫小贝", "邢捕头", "燕小六"];
+        const FIRST_NAMES = ["慕容", "南宫", "欧阳", "令狐", "独孤", "公孙", "上官", "端木"];
+        const LAST_NAMES = ["子轩", "青霞", "惊鸿", "千尘", "无双", "凌霜", "如风", "映雪", "飞云"];
+        const APPEARANCES = ["青衫仗剑", "斗笠遮面", "背着药箱", "手持拂尘", "络腮胡须", "独眼眼罩", "书生打扮", "红衣女侠", "丐帮装束"];
+        const CODES = ["葵花点穴手", "排山倒海", "子曾经曰过", "额滴神啊", "照顾好我七舅姥爷", "低调低调", "帮我照顾好我七舅姥爷"];
+        const ILLEGAL_CITIES = ["黑风寨", "飞刀门", "天鹰教", "青衣楼", "同福客栈对家"];
+
+        const DAILY_EFFECTS = [
+            { name: "💢 佟掌柜发飙", effect: (delta) => Math.round(delta * 1.2), desc: "声誉变化±20%" },
+            { name: "📖 吕秀才说教", extraCheck: true, desc: "今日额外多一项核查（六项变七项）" },
+            { name: "💰 郭芙蓉缺钱", desc: "行贿事件概率大增", bribeBoost: true },
+            { name: "🛡️ 白展堂护体", effect: (delta, isCorrect) => isCorrect ? delta + 1 : delta, desc: "每次正确判定额外+1声誉" },
+            { name: "🍜 李大嘴偷吃", effect: (delta, isCorrect) => isCorrect ? delta : delta - 1, desc: "错误扣分额外-1" },
+            { name: "🎁 莫小贝捣蛋", startMoney: 25, desc: "私房钱+25" }
+        ];
+
+        // ---------- 事件库（武林外传梗）----------
+        const ADVANCED_EVENTS = [
+            {
+                title: "😭 佟湘玉的旧相好", type: "tong",
+                desc: "一位来自汉中的商贾自称是佟掌柜青梅竹马，想借道寻找失散多年的玉佩，但文牒签发地不符。",
+                options: [
+                    { text: "念旧情放行", score: 1, money: 0, msg: "佟湘玉听说后默许，声誉+1，但大家觉得你心软。", kindness: true, followupType: "tong_kind" },
+                    { text: "秉公拒绝", score: 0, money: 15, msg: "商贾塞了银子，你收下15钱，但原则还在。", kindness: false, followupType: "tong_strict" },
+                    { text: "上报邢捕头", score: 0, money: 0, msg: "邢捕头赶来，发现此人是个骗子，幸好你上报及时。", followupType: "tong_report" }
+                ]
+            },
+            {
+                title: "🕊️ 白展堂被认出来了", type: "laobai",
+                desc: "一个江湖客突然大喊：“盗圣白玉汤！” 引来围观，老白急得满头大汗。",
+                options: [
+                    { text: "帮他打掩护", score: 2, money: -5, msg: "你机智圆场，声誉+2，但请客花了5钱。", kindness: true, followupType: "laobai_help" },
+                    { text: "当场撇清关系", score: -1, money: 0, msg: "众人议论纷纷，声誉-1。", followupType: "laobai_betray" },
+                    { text: "塞钱封口", score: 0, money: -30, msg: "那人拿了钱笑嘻嘻走了，私房钱-30。", followupType: "laobai_bribe" }
+                ]
+            },
+            {
+                title: "💢 郭芙蓉想家", type: "guo",
+                desc: "郭巨侠派人来传话，小郭想闯关回京城，但没带齐文牒。",
+                options: [
+                    { text: "法外开恩", score: 1, money: 0, msg: "小郭感激，声誉+1。", kindness: true, followupType: "guo_allow" },
+                    { text: "必须按规矩", score: 2, money: 0, msg: "你坚持原则，得到秀才点赞，声誉+2。", followupType: "guo_strict" },
+                    { text: "私放收好处", score: -1, money: 25, msg: "小郭给了你银两，声誉-1，钱+25。", followupType: "guo_bribe" }
+                ]
+            },
+            {
+                title: "📜 秀才讲大道理", type: "xiucai",
+                desc: "一名穷书生非要和你探讨“子曾经曰过”，耽误审查时间。",
+                options: [
+                    { text: "耐心听讲", score: 2, money: 0, msg: "书生敬佩你，声誉+2。", followupType: "xiucai_listen" },
+                    { text: "轰走", score: -1, money: 0, msg: "他到处说你无礼，声誉-1。", followupType: "xiucai_kick" },
+                    { text: "收学费", score: 0, money: 20, msg: "你收下20钱教学费。", followupType: "xiucai_money" }
+                ]
+            },
+            {
+                title: "🎺 燕小六吹唢呐", type: "xiaoliu",
+                desc: "燕小六在关口练习唢呐，吵得旅客纷纷投诉。",
+                options: [
+                    { text: "一起嗨", score: -1, money: 0, msg: "旅客更生气了，声誉-1。", followupType: "liu_join" },
+                    { text: "没收唢呐", score: 1, money: 0, msg: "世界清静了，声誉+1。", followupType: "liu_stop" },
+                    { text: "找邢捕头投诉", score: 0, money: 0, msg: "邢捕头罚了小六，事情平息。", followupType: "liu_report" }
+                ]
+            }
+        ];
+
+        // 后续事件
+        const FOLLOWUP_EVENTS = {
+            tong_kind: [{ title: "💔 湘玉的眼泪", desc: "佟湘玉得知旧相好是骗子，责怪你心太软，声誉-1。", score: -1, money: 0, msg: "声誉-1。" }],
+            tong_strict: [{ title: "🏅 廉洁锦旗", desc: "七侠镇商会送来锦旗，声誉+2。", score: 2, money: 0, msg: "声誉+2。" }],
+            tong_report: [{ title: "🕵️ 邢捕头嘉奖", desc: "因为你举报有功，声誉+1。", score: 1, money: 0, msg: "声誉+1。" }],
+            laobai_help: [{ title: "🤝 老白请客", desc: "白展堂请你喝酒，私房钱+10，声誉+1。", score: 1, money: 10, msg: "声誉+1，钱+10。" }],
+            laobai_betray: [{ title: "😠 老白生气", desc: "白展堂跟你冷战，声誉-1。", score: -1, money: 0, msg: "声誉-1。" }],
+            laobai_bribe: [{ title: "🕳️ 被人讹诈", desc: "那人继续勒索，你损失20钱。", score: -1, money: -20, msg: "声誉-1，钱-20。" }],
+            guo_allow: [{ title: "🥟 郭芙蓉送饺子", desc: "小郭给你带了一笼饺子，私房钱+5。", score: 0, money: 5, msg: "钱+5。" }],
+            guo_strict: [{ title: "📖 秀才写诗赞扬", desc: "吕秀才作诗表扬，声誉+1。", score: 1, money: 0, msg: "声誉+1。" }],
+            guo_bribe: [{ title: "⚠️ 被巨侠知道", desc: "郭巨侠得知你收钱，声誉-2。", score: -2, money: 0, msg: "声誉-2。" }],
+            xiucai_listen: [{ title: "📚 书生成名", desc: "书生中了举人回来感谢，声誉+2。", score: 2, money: 0, msg: "声誉+2。" }],
+            xiucai_kick: [{ title: "😤 坏名声", desc: "七侠镇文人圈抵制你，声誉-1。", score: -1, money: 0, msg: "声誉-1。" }],
+            xiucai_money: [{ title: "📖 抄袭丑闻", desc: "书生举报你剽窃文章，声誉-2，钱-10。", score: -2, money: -10, msg: "声誉-2，钱-10。" }],
+            liu_join: [{ title: "🎶 集体投诉", desc: "更多旅客投诉，声誉-2。", score: -2, money: 0, msg: "声誉-2。" }],
+            liu_stop: [{ title: "📯 小六怀恨", desc: "燕小六偷偷搞破坏，声誉-1。", score: -1, money: 0, msg: "声誉-1。" }],
+            liu_report: [{ title: "👮 邢捕头请客", desc: "邢捕头请你喝酒，钱+5。", score: 0, money: 5, msg: "钱+5。" }]
+        };
+
+        // DOM 元素
+        const officerNameSpan = document.getElementById("officerName");
+        const scoreSpan = document.getElementById("scoreValue");
+        const moneySpan = document.getElementById("moneyValue");
+        const caseCounterSpan = document.getElementById("caseCounter");
+        const totalCasesSpan = document.getElementById("totalCasesSpan");
+        const dayInfoSpan = document.getElementById("dayInfo");
+        const approveBtn = document.getElementById("approveBtn");
+        const rejectBtn = document.getElementById("rejectBtn");
+        const resetBtn = document.getElementById("resetBtn");
+        const feedbackDiv = document.getElementById("feedbackMsg");
+        const eventArea = document.getElementById("dynamicEventArea");
+        const dailyEffectArea = document.getElementById("dailyEffectArea");
+        const decreeWarning = document.getElementById("decreeWarning");
+        const amuletCountSpan = document.getElementById("amuletCount");
+        const lensCountSpan = document.getElementById("lensCount");
+        const bribeExemptSpan = document.getElementById("bribeExemptCount");
+        const declNameSpan = document.getElementById("declName");
+        const declIDSpan = document.getElementById("declID");
+        const declPhotoSpan = document.getElementById("declPhoto");
+        const declFingerSpan = document.getElementById("declFinger");
+        const docNameSpan = document.getElementById("docName");
+        const docIDSpan = document.getElementById("docID");
+        const docPhotoSpan = document.getElementById("docPhoto");
+        const docFingerSpan = document.getElementById("docFinger");
+        const docExpirySpan = document.getElementById("docExpiry");
+        const docIssueSpan = document.getElementById("docIssue");
+
+        // 辅助函数
+        function randomElem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        function randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        function generateName() { return `${randomElem(FIRST_NAMES)}·${randomElem(LAST_NAMES)}`; }
+        function generateID() { return `TJ-${randomInt(1000, 9999)}`; }
+        function generateAppearance() { return randomElem(APPEARANCES); }
+        function generateCode() { return randomElem(CODES); }
+        function generateValidExpiry() { return `2025-${String(randomInt(1,12)).padStart(2,'0')}-${String(randomInt(1,28)).padStart(2,'0')}`; }
+        function generateExpiredExpiry() { return `2024-${String(randomInt(1,12)).padStart(2,'0')}-${String(randomInt(1,28)).padStart(2,'0')}`; }
+        function isExpiryValid(expiry) { return expiry >= "2025-01-01"; }
+
+        let score = 0, money = 0, processedCount = 0, gameActive = true, currentDay = 1;
+        let extraCheckFlag = false, bribeBoostFlag = false;
+        let dailyEffect = null, activeEvent = null;
+        let amulets = 0, lenses = 0, bribeExempt = 0;
+        let playerChoices = {}, followupTriggered = new Set(), motherForced = false;
+        let stats = {
+            totalDecisions:0, correctDecisions:0, totalBribesTaken:0, totalBribesRefused:0,
+            amuletUsed:0, lensUsed:0, itemsBought:{ amulet:0, lens:0, exempt:0 },
+            eventsTriggered:new Set(), consecutiveCorrectMax:0, consecutiveWrongMax:0, kindnessChoices:0
+        };
+        let consecutiveCorrect = 0, consecutiveWrong = 0;
+        let currentApplicant = null;
+
+        function generateValidApplicant() {
+            let name = generateName(), id = generateID(), photo = generateAppearance(), finger = generateCode();
+            return {
+                declaration: { name, id, photo, finger },
+                document: { name, id, photo, finger, expiry: generateValidExpiry(), issueCity: LEGAL_CITY }
+            };
+        }
+
+        function generateErroneousApplicant(validBase) {
+            let faultyDecl = { ...validBase.declaration };
+            let faultyDoc = { ...validBase.document };
+            let errorCount = randomInt(1, MAX_ERRORS);
+            if (extraCheckFlag) errorCount = Math.min(MAX_ERRORS, errorCount + 1);
+            let errTypes = [];
+            while (errTypes.length < errorCount) {
+                let e = randomInt(0, 5);
+                if (!errTypes.includes(e)) errTypes.push(e);
+            }
+            for (let e of errTypes) {
+                if (e === 0) { let nn = generateName(); while (nn === faultyDecl.name) nn = generateName(); faultyDoc.name = nn; }
+                else if (e === 1) { let nid = generateID(); while (nid === faultyDecl.id) nid = generateID(); faultyDoc.id = nid; }
+                else if (e === 2) { let np = generateAppearance(); while (np === faultyDecl.photo) np = generateAppearance(); faultyDoc.photo = np; }
+                else if (e === 3) { let nf = generateCode(); while (nf === faultyDecl.finger) nf = generateCode(); faultyDoc.finger = nf; }
+                else if (e === 4) faultyDoc.expiry = generateExpiredExpiry();
+                else if (e === 5) faultyDoc.issueCity = randomElem(ILLEGAL_CITIES);
+            }
+            return { declaration: faultyDecl, document: faultyDoc };
+        }
+
+        function generateApplicant() {
+            let isLegal = Math.random() < LEGAL_PROBABILITY;
+            let valid = generateValidApplicant();
+            let data = isLegal ? valid : generateErroneousApplicant(valid);
+            let shouldApprove = (
+                data.declaration.name === data.document.name &&
+                data.declaration.id === data.document.id &&
+                data.declaration.photo === data.document.photo &&
+                data.declaration.finger === data.document.finger &&
+                isExpiryValid(data.document.expiry) &&
+                data.document.issueCity === LEGAL_CITY
+            );
+            if (lenses > 0 && !shouldApprove) {
+                let hint = "";
+                if (data.declaration.name !== data.document.name) hint = "🔍 盗圣提示：姓名对不上！";
+                else if (data.declaration.id !== data.document.id) hint = "🔍 盗圣提示：江湖ID不符！";
+                else if (data.declaration.photo !== data.document.photo) hint = "🔍 盗圣提示：相貌描述有问题！";
+                else if (data.declaration.finger !== data.document.finger) hint = "🔍 盗圣提示：暗号指纹错误！";
+                else if (!isExpiryValid(data.document.expiry)) hint = "🔍 盗圣提示：文牒已过期！";
+                else if (data.document.issueCity !== LEGAL_CITY) hint = "🔍 盗圣提示：签发地不是七侠镇！";
+                else hint = "🔍 盗圣挠头：都一致，但直觉不对……";
+                lenses--;
+                stats.lensUsed++;
+                updateItemUI();
+                feedbackDiv.innerHTML = `${hint}<br>${feedbackDiv.innerHTML}`;
+            }
+            return { ...data, shouldApprove };
+        }
+
+        function renderApplicant(a) {
+            declNameSpan.innerText = a.declaration.name;
+            declIDSpan.innerText = a.declaration.id;
+            declPhotoSpan.innerText = a.declaration.photo;
+            declFingerSpan.innerText = a.declaration.finger;
+            docNameSpan.innerText = a.document.name;
+            docIDSpan.innerText = a.document.id;
+            docPhotoSpan.innerText = a.document.photo;
+            docFingerSpan.innerText = a.document.finger;
+            docExpirySpan.innerText = a.document.expiry;
+            docIssueSpan.innerText = a.document.issueCity;
+        }
+
+        function updateStatsUI() {
+            scoreSpan.innerText = score;
+            moneySpan.innerText = money;
+            caseCounterSpan.innerText = processedCount;
+            totalCasesSpan.innerText = TOTAL_CASES;
+            dayInfoSpan.innerText = `第 ${currentDay} / ${TOTAL_DAYS} 日`;
+            updateItemUI();
+        }
+
+        function updateItemUI() {
+            amuletCountSpan.innerText = amulets;
+            lensCountSpan.innerText = lenses;
+            bribeExemptSpan.innerText = bribeExempt;
+        }
+
+        function applyScoreModifier(delta, isCorrect) {
+            if (dailyEffect && dailyEffect.effect) return dailyEffect.effect(delta, isCorrect);
+            return delta;
+        }
+
+        function tryTriggerFollowup() {
+            if (processedCount < 8) return;
+            let possible = Object.keys(playerChoices).filter(k => playerChoices[k] && !followupTriggered.has(k) && FOLLOWUP_EVENTS[k]);
+            if (possible.length === 0) return;
+            if (Math.random() > 0.4) return;
+            let type = randomElem(possible);
+            let evList = FOLLOWUP_EVENTS[type];
+            if (evList && evList.length) {
+                let ev = randomElem(evList);
+                followupTriggered.add(type);
+                activeEvent = { resolved: false };
+                eventArea.style.display = "block";
+                let html = `<strong>⚡ ${ev.title}</strong><br>${ev.desc}<div class="event-buttons"><button class="event-btn" data-score="${ev.score}" data-money="${ev.money}" data-msg="${ev.msg}">知晓</button></div>`;
+                eventArea.innerHTML = html;
+                document.querySelectorAll('.event-btn').forEach(btn => {
+                    btn.onclick = () => {
+                        score += parseInt(btn.dataset.score) || 0;
+                        money += parseInt(btn.dataset.money) || 0;
+                        if (score < 0) score = 0;
+                        if (money < 0) money = 0;
+                        updateStatsUI();
+                        feedbackDiv.innerHTML = `✨ ${btn.dataset.msg}`;
+                        activeEvent.resolved = true;
+                        eventArea.style.display = "none";
+                        activeEvent = null;
+                    };
+                });
+            }
+        }
+
+        function showEvent(eventData) {
+            activeEvent = { ...eventData, resolved: false };
+            stats.eventsTriggered.add(eventData.type);
+            eventArea.style.display = "block";
+            let html = `<strong>⚡ ${eventData.title}</strong><br>${eventData.desc}<div class="event-buttons">`;
+            eventData.options.forEach((opt, idx) => {
+                html += `<button class="event-btn" data-opt="${idx}">${opt.text}</button>`;
+            });
+            html += `</div>`;
+            eventArea.innerHTML = html;
+            document.querySelectorAll('.event-btn').forEach(btn => {
+                btn.onclick = () => {
+                    let idx = parseInt(btn.dataset.opt);
+                    let chosen = eventData.options[idx];
+                    score += chosen.score;
+                    money += chosen.money;
+                    if (score < 0) score = 0;
+                    if (money < 0) money = 0;
+                    updateStatsUI();
+                    feedbackDiv.innerHTML = `✨ ${chosen.msg}`;
+                    if (chosen.kindness) stats.kindnessChoices++;
+                    if (chosen.followupType) playerChoices[chosen.followupType] = true;
+                    activeEvent.resolved = true;
+                    eventArea.style.display = "none";
+                    activeEvent = null;
+                    tryTriggerFollowup();
+                };
+            });
+        }
+
+        function triggerAdvancedEvent() {
+            if (processedCount >= TOTAL_CASES) return;
+            if (activeEvent) return;
+            if (!motherForced && processedCount >= 12) {
+                motherForced = true;
+                let ev = ADVANCED_EVENTS.find(e => e.type === "tong");
+                if (ev) { showEvent(ev); return; }
+            }
+            let rate = EVENT_TRIGGER_RATE;
+            if (bribeBoostFlag) rate = Math.min(0.9, rate + 0.2);
+            if (Math.random() > rate) return;
+            showEvent(randomElem(ADVANCED_EVENTS));
+        }
+
+        function handleDecision(action) {
+            if (!gameActive || processedCount >= TOTAL_CASES) return;
+            if (activeEvent && !activeEvent.resolved) {
+                feedbackDiv.innerHTML = "⚠️ 先处理眼前江湖事！";
+                return;
+            }
+            let should = currentApplicant.shouldApprove;
+            let isCorrect = (action === 'approve' && should) || (action === 'reject' && !should);
+            let delta = isCorrect ? 1 : -1;
+            stats.totalDecisions++;
+            if (isCorrect) stats.correctDecisions++;
+            let finalDelta = delta;
+            if (!isCorrect && amulets > 0) {
+                finalDelta = 0;
+                amulets--;
+                stats.amuletUsed++;
+                updateItemUI();
+                feedbackDiv.innerHTML = "🛡️ 免罪护符生效，保住声誉！";
+            }
+            finalDelta = applyScoreModifier(finalDelta, isCorrect);
+            let bonus = 0;
+            if (isCorrect) {
+                consecutiveCorrect++;
+                consecutiveWrong = 0;
+                if (consecutiveCorrect >= 2) { bonus = 1; consecutiveCorrect = 0; }
+            } else {
+                consecutiveWrong++;
+                consecutiveCorrect = 0;
+                if (consecutiveWrong >= 2) { bonus = -1; consecutiveWrong = 0; }
+            }
+            finalDelta += bonus;
+            score += finalDelta;
+            if (score < 0) score = 0;
+            processedCount++;
+            updateStatsUI();
+            feedbackDiv.innerHTML = `${isCorrect ? "✅ 秉公处理" : "❌ 判断有误"} (${delta > 0 ? `+${delta}` : delta}分${bonus !== 0 ? ` ${bonus > 0 ? '+' + bonus : bonus}` : ''}) 当前声誉:${score}`;
+            if (processedCount % DAY_CASES === 0 && processedCount !== 0 && processedCount < TOTAL_CASES) endOfDay();
+            else if (processedCount >= TOTAL_CASES) endGame();
+            else { triggerAdvancedEvent(); nextApplicant(); }
+        }
+
+        function nextApplicant() {
+            currentApplicant = generateApplicant();
+            renderApplicant(currentApplicant);
+        }
+
+        function endOfDay() {
+            if (currentDay >= TOTAL_DAYS) return;
+            feedbackDiv.innerHTML = `📆 第${currentDay}日毕，明日继续营业。声誉:${score} 私房钱:${money}`;
+            consecutiveCorrect = 0;
+            consecutiveWrong = 0;
+            currentDay++;
+            extraCheckFlag = false;
+            bribeBoostFlag = false;
+            applyDailyEffect();
+            updateStatsUI();
+            currentApplicant = generateApplicant();
+            renderApplicant(currentApplicant);
+        }
+
+        function applyDailyEffect() {
+            dailyEffect = randomElem(DAILY_EFFECTS);
+            extraCheckFlag = dailyEffect.extraCheck || false;
+            bribeBoostFlag = dailyEffect.bribeBoost || false;
+            if (dailyEffect.startMoney) {
+                money += dailyEffect.startMoney;
+                updateStatsUI();
+                feedbackDiv.innerHTML = `🎁 ${dailyEffect.name}：意外之财+${dailyEffect.startMoney}钱。`;
+            }
+            dailyEffectArea.style.display = "block";
+            dailyEffectArea.innerHTML = `📌 今日效果 · ${dailyEffect.name}：${dailyEffect.desc}`;
+            decreeWarning.style.display = "none";
+        }
+
+        function endGame() {
+            gameActive = false;
+            approveBtn.disabled = true;
+            rejectBtn.disabled = true;
+            let correctRate = stats.totalDecisions === 0 ? 0 : Math.round((stats.correctDecisions / stats.totalDecisions) * 100);
+            let title = "", desc = "";
+            if (money >= 200 && score <= 8) { title = "🚨 被逐出同福"; desc = "你贪赃枉法，佟掌柜一气之下将你赶出客栈，江湖再无容身之处。"; }
+            else if (score >= 22 && money <= 30) { title = "🏆 新晋掌柜"; desc = "佟湘玉提拔你当二掌柜，同福客栈名声大噪，你成了七侠镇传奇。"; }
+            else if (score >= 18) { title = "⭐ 关中侠客"; desc = "你公正严明，获赠‘关中大侠’牌匾，受百姓敬仰。"; }
+            else if (money >= 150) { title = "💰 富甲一方"; desc = "你积累大量私房钱，却丢了名声，被人指指点点。"; }
+            else if (score <= 5) { title = "😵 背锅跑堂"; desc = "屡屡犯错，被发配去后厨洗碗，永无出头之日。"; }
+            else { title = "📋 普通伙计"; desc = "无功无过，继续在同福客栈端盘子。"; }
+            let achievements = [];
+            if (stats.correctDecisions >= 25) achievements.push("⚖️ 铁面判官");
+            if (money >= 180) achievements.push("💰 商业鬼才");
+            if (stats.lensUsed >= 8) achievements.push("🔍 盗圣传人");
+            if (stats.kindnessChoices >= 3) achievements.push("🕊️ 心太软");
+            let achStr = achievements.length ? `🏅 成就：${achievements.slice(0, 3).join(" · ")}` : "";
+            feedbackDiv.innerHTML = `<div class="end-report"><h3>📜 江湖总结 · ${title}</h3><p>声誉值: ${score} | 私房钱: ${money}<br>正确率: ${stats.correctDecisions}/${stats.totalDecisions} (${correctRate}%)<br>${desc}<br>${achStr}</p><p style="margin-top:10px;">🎭 点击「重开江湖」再续前缘</p></div>`;
+        }
+
+        function resetGame() {
+            let rname = randomElem(OFFICER_NAMES);
+            officerNameSpan.innerText = rname;
+            score = 0; money = 0; processedCount = 0; gameActive = true; currentDay = 1;
+            extraCheckFlag = false; bribeBoostFlag = false;
+            amulets = 0; lenses = 0; bribeExempt = 0;
+            activeEvent = null; eventArea.style.display = "none";
+            approveBtn.disabled = false; rejectBtn.disabled = false;
+            playerChoices = {}; followupTriggered.clear(); motherForced = false;
+            stats = {
+                totalDecisions:0, correctDecisions:0, totalBribesTaken:0, totalBribesRefused:0,
+                amuletUsed:0, lensUsed:0, itemsBought:{ amulet:0, lens:0, exempt:0 },
+                eventsTriggered:new Set(), consecutiveCorrectMax:0, consecutiveWrongMax:0, kindnessChoices:0
+            };
+            consecutiveCorrect = 0; consecutiveWrong = 0;
+            applyDailyEffect();
+            currentApplicant = generateApplicant();
+            renderApplicant(currentApplicant);
+            updateStatsUI();
+            feedbackDiv.innerHTML = "🏮 新的一轮，六项法则刻心间！";
+        }
+
+        // 商店
+        const modal = document.getElementById("shopModal");
+        const shopBtn = document.getElementById("shopBtn");
+        const closeModal = document.getElementById("closeModal");
+        const buyAmulet = document.getElementById("buyAmulet");
+        const buyLens = document.getElementById("buyLens");
+        const buyExempt = document.getElementById("buyExempt");
+        shopBtn.onclick = () => modal.style.display = "flex";
+        closeModal.onclick = () => modal.style.display = "none";
+        window.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
+        buyAmulet.onclick = () => { if (money >= 30) { money -= 30; amulets++; stats.itemsBought.amulet++; updateStatsUI(); feedbackDiv.innerHTML = "🛡️ 购得免罪护符一枚！"; modal.style.display = "none"; } else alert("私房钱不够！"); };
+        buyLens.onclick = () => { if (money >= 20) { money -= 20; lenses += 3; stats.itemsBought.lens++; updateStatsUI(); feedbackDiv.innerHTML = "🔍 盗圣放大镜到手！"; modal.style.display = "none"; } else alert("钱两不足！"); };
+        buyExempt.onclick = () => { if (money >= 40) { money -= 40; bribeExempt++; stats.itemsBought.exempt++; updateStatsUI(); feedbackDiv.innerHTML = "💰 贿赂豁免券，防身用！"; modal.style.display = "none"; } else alert("囊中羞涩！"); };
+
+        approveBtn.onclick = () => { if (gameActive) handleDecision('approve'); };
+        rejectBtn.onclick = () => { if (gameActive) handleDecision('reject'); };
+        resetBtn.onclick = resetGame;
+
+        const startBtn = document.getElementById("startGameBtn");
+        const intro = document.getElementById("introOverlay");
+        const container = document.getElementById("gameContainer");
+        startBtn.onclick = () => {
+            intro.style.display = "none";
+            container.style.display = "block";
+            resetGame();
+        };
+    })();
+</script>
+</body>
+</html>
